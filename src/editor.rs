@@ -26,6 +26,9 @@ impl Editor {
             }
         }
     }
+    pub fn default() -> Self {
+        Editor{}
+    }
 }
 
 fn terminate(e: std::io::Error) {
