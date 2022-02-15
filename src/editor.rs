@@ -1,27 +1,39 @@
-use std::io::{self, stdout};
+use std::io::{self, stdout, Write};
 use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
-pub struct Editor {}
+pub struct Editor {
+    exit: bool,
+}
 
 impl Editor {
-    pub fn run(&self) {
+    pub fn run(&mut self) {
         let _stdout = stdout().into_raw_mode().unwrap();
 
         loop {
+            if let Err(error) = self.refresh_screen() {
+                terminate(error);
+            }
+            if self.exit {
+                break;
+            }
             if let Err(error) = self.process_keypress() {
                 terminate(error);
             }
         }
     }
     pub fn default() -> Self {
-        Self{}
+        Self { exit: false }
     }
-    fn process_keypress(&self) -> Result<(), std::io::Error> {
+    fn refresh_screen(&self) -> Result<(), std::io::Error> {
+        print!("\x1b[2j");
+        io::stdout().flush()
+    }
+    fn process_keypress(&mut self) -> Result<(), std::io::Error> {
         let pressed_key = read_key()?;
         match pressed_key {
-            Key::Ctrl('q') => panic!("Program end"),
+            Key::Ctrl('q') => self.exit = true,
             _ => (),
         }
         Ok(())
