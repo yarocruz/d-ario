@@ -30,6 +30,8 @@ impl Editor {
         print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
         if self.exit {
             println!("Goodbye.\r");
+        } else {
+            self.draw_rows();
         }
         io::stdout().flush()
     }
@@ -40,6 +42,11 @@ impl Editor {
             _ => (),
         }
         Ok(())
+    }
+    fn draw_rows(&self) {
+        for _ in 0..24 {
+            println!("~\r");
+        }
     }
 }
 
