@@ -3,9 +3,9 @@ use termion::event::Key;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-struct Position {
-    x: usize,
-    y: usize,
+pub struct Position {
+    pub x: usize,
+    pub y: usize,
 }
 
 pub struct Editor {
@@ -38,13 +38,13 @@ impl Editor {
     }
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
         Terminal::cursor_hide();
-        Terminal::cursor_position(0,0);
+        Terminal::cursor_position(&Position { x: 0, y: 0});
         if self.exit {
             Terminal::clear_screen();
             println!("Goodbye.\r");
         } else {
             self.draw_rows();
-            Terminal::cursor_position(0,0);
+            Terminal::cursor_position(&self.cursor_position);
         }
         Terminal::cursor_show();
         Terminal::flush()
@@ -53,9 +53,21 @@ impl Editor {
         let pressed_key = Terminal::read_key()?;
         match pressed_key {
             Key::Ctrl('q') => self.exit = true,
+            Key::Up | Key::Down | Key::Left | Key::Right => self.move_cursor(pressed_key),
             _ => (),
         }
         Ok(())
+    }
+    fn move_cursor(&mut self, key: Key) {
+        let Position { mut y, mut x } = self.cursor_position;
+        match key {
+            Key::Up => y = y.saturating_sub(1),
+            Key::Down => y = y.saturating_add(1),
+            Key::Left => x = x.saturating_sub(1),
+            Key::Right => x = x.saturating_add(1),
+            _ => (),
+        }
+        self.cursor_position = Position { x, y }
     }
     fn draw_welcome_message(&self) {
         let mut welcome_message = format!("d-ario editor -- version {}\r", VERSION);
