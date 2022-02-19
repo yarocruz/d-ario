@@ -6,7 +6,6 @@ use std::time::Duration;
 use std::time::Instant;
 use termion::color;
 use termion::event::Key;
-use termion::event::Key::Down;
 
 const STATUS_FG_COLOR: color::Rgb = color::Rgb(63, 63, 63);
 const STATUS_BG_COLOR: color::Rgb = color::Rgb(239, 239, 239);
@@ -103,6 +102,10 @@ impl Editor {
         let pressed_key = Terminal::read_key()?;
         match pressed_key {
             Key::Ctrl('q') => self.exit = true,
+            Key::Char(c) => {
+                self.document.insert(&self.cursor_position, c);
+                self.move_cursor(Key::Right);
+            }
             Key::Up
             | Key::Down
             | Key::Left
